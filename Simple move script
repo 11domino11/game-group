@@ -1,0 +1,100 @@
+using UnityEngine;
+using System.Collections;
+
+[RequireComponent(typeof(CharacterController))]
+public class playerMovement : MonoBehaviour {
+    //move variables
+    public float moveSpeed = 5.0F;
+    public float rotateSpeed = 30f;
+    CharacterController cc;
+    Quaternion targetRotation;
+
+
+    public float jumpHeight = 5.0f;
+    //camera switch
+    private int view = 0;
+    public GameObject firstPerson;
+    public GameObject thirdPerson;
+    public GameObject topDown;
+    //spawn position
+    private Vector3 spawnP;
+    private Vector3 spawnR;
+    private Vector3 playerPos;
+
+    // Use this for initialization
+    void Start () {
+        spawnP = transform.position;
+        cc = GetComponent<CharacterController>();
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        playerPos = transform.position;
+        Vector3 forward = Input.GetAxis("Vertical") * transform.TransformDirection(Vector3.forward) * moveSpeed;
+        transform.Rotate(new Vector3(0, Input.GetAxis("Horizontal") * rotateSpeed * Time.deltaTime, 0));
+        cc.Move(forward * Time.deltaTime);
+        cc.SimpleMove(Physics.gravity);
+      
+        if(Input.GetKey(KeyCode.LeftShift))
+        {
+            moveSpeed = 20.0f;
+        }
+        else
+        {
+            moveSpeed = 5f;
+        }
+
+        
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            view++;
+        }
+        if(view == 0)
+        {
+            FirstPerson();
+        }
+        if(view == 1)
+        {
+            ThirdPerson();
+        }
+        if(view == 2)
+        {
+            TopDown();
+        }
+        if(view == 3)
+        {
+            view = 0;
+        }
+
+        if(playerPos.y <= -10)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        transform.position = spawnP;
+    }
+
+    public void FirstPerson()
+    {
+        firstPerson.GetComponent<Camera>().enabled = true;
+        thirdPerson.GetComponent<Camera>().enabled = false;
+        topDown.GetComponent<Camera>().enabled = false;
+    }
+
+    public void ThirdPerson()
+    {
+        firstPerson.GetComponent<Camera>().enabled = false;
+        thirdPerson.GetComponent<Camera>().enabled = true;
+        topDown.GetComponent<Camera>().enabled = false;
+    }
+
+    public void TopDown()
+    {
+        firstPerson.GetComponent<Camera>().enabled = false;
+        thirdPerson.GetComponent<Camera>().enabled = false;
+        topDown.GetComponent<Camera>().enabled = true;
+    }
+}
